@@ -1,15 +1,23 @@
 import 'dart:io';
 
 import 'package:distributor_flutter_android/services/git_wrapper/git_wrapper.dart';
-import 'package:distributor_flutter_android/services/parsers/git_info/git_info_parser.dart';
+import 'package:distributor_flutter_android/services/parsers/stdout_parser/stdout_parser.dart';
 import 'package:git/git.dart' as git_service;
 
 class GitWrapperImpl implements GitWrapper {
   GitWrapperImpl({
-    required final GitInfoParser gitInfoParser,
-  }) : _gitInfoParser = gitInfoParser;
+    required final StdoutParser stdoutParser,
+    this.logStdout = false,
+  }) : _stdoutParser = stdoutParser;
 
-  final GitInfoParser _gitInfoParser;
+  final StdoutParser _stdoutParser;
+  final bool logStdout;
+
+  void _printStdout(final dynamic stdout) {
+    if (logStdout) {
+      print(stdout.toString().trim());
+    }
+  }
 
   @override
   Future<bool> checkout(final String dirGit, final String branch) async {
@@ -17,6 +25,7 @@ class GitWrapperImpl implements GitWrapper {
       ['checkout', '-b', branch],
       processWorkingDir: dirGit,
     );
+    _printStdout(result.stdout);
     return result.exitCode == 0;
   }
 
@@ -30,6 +39,7 @@ class GitWrapperImpl implements GitWrapper {
       ['clone', urlRepo],
       processWorkingDir: dirSaving,
     );
+    _printStdout(result.stdout);
     return result.exitCode == 0;
   }
 
@@ -39,7 +49,8 @@ class GitWrapperImpl implements GitWrapper {
       ['fetch'],
       processWorkingDir: dirRepo,
     );
-    return !(await _gitInfoParser.emptyOutput(result.stdout.toString()));
+    _printStdout(result.stdout);
+    return !(await _stdoutParser.emptyOutput(result.stdout.toString()));
   }
 
   @override

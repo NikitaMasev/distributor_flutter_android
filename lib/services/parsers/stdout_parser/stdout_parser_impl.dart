@@ -1,7 +1,7 @@
-import 'package:distributor_flutter_android/services/parsers/git_info/git_info_parser.dart';
+import 'package:distributor_flutter_android/services/parsers/stdout_parser/stdout_parser.dart';
 
-class GitInfoParserImpl implements GitInfoParser {
-  const GitInfoParserImpl();
+class StdoutParserImpl implements StdoutParser {
+  const StdoutParserImpl();
 
   @override
   Future<bool> emptyOutput(final String stdout) async => stdout.trim().isEmpty;

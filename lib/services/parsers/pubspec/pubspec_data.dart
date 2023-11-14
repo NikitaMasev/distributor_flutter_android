@@ -6,4 +6,8 @@ class PubSpecData {
 
   final String version;
   final int build;
+
+  factory PubSpecData.empty() => PubSpecData(version: '0', build: 0);
+
+  bool get isValid => version != '0' && build != 0;
 }
