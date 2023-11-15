@@ -7,6 +7,7 @@ import 'package:distributor_flutter_android/services/parsers/stdout/impl/stdout_
 import 'package:distributor_flutter_android/services/parsers/stdout/impl/stdout_sdk_version_parser.dart';
 import 'package:distributor_flutter_android/services/parsers/stdout_parser/stdout_parser_impl.dart';
 import 'package:distributor_flutter_android/services/sources_code_builder/flutter_android_builder_impl.dart';
+import 'package:distributor_flutter_android/services/sources_code_puller/source_code_puller.dart';
 
 Future<void> main() async {
   const stdoutParser = StdoutParserImpl();
@@ -14,24 +15,21 @@ Future<void> main() async {
     stdoutParser: stdoutParser,
   );
 
-  if (Directory(localDirForSourceCode).existsSync()) {
-    final needUpdate = await gitWrapper.fetch(
-      localDirForSourceCode,
-      urlSourceCode,
-    );
-    if (needUpdate) {
-      await gitWrapper.pull(localDirForSourceCode, urlSourceCode);
-    }
-  } else {
-    await gitWrapper.clone(localDirForSourceCode, urlSourceCode);
-  }
+  final sourceCodePuller = SourceCodePuller(
+    localDirForSourceCode: localDirForSourceCode,
+    urlSourceCode: urlSourceCode,
+    gitWrapper: gitWrapper,
+  );
+
+  await sourceCodePuller.execute();
 
   final parserSdk = StdoutSdkVersionParser(stdoutParser: stdoutParser);
   final parserBuildUniversal = StdoutBuildApkParser(stdoutParser: stdoutParser);
   final parserBuildAbi = StdoutBuildAbiApkParser(stdoutParser: stdoutParser);
 
   final flutterAndroidBuilder = FlutterAndroidBuilderImpl(
-    workingDir: _getWorkingDir(localDirForSourceCode, urlSourceCode.split('/').last),
+    workingDir:
+        _getWorkingDir(localDirForSourceCode, urlSourceCode.split('/').last),
     parserSdk: parserSdk,
     parserBuildUniversal: parserBuildUniversal,
     parserBuildAbi: parserBuildAbi,
@@ -44,9 +42,9 @@ Future<void> main() async {
 }
 
 String _getWorkingDir(
-    final String localGitDirName,
-    final String projectDirName,
-    ) {
+  final String localGitDirName,
+  final String projectDirName,
+) {
   final workingDir =
       '${Directory.current.path}/$localGitDirName/$projectDirName/';
   print(workingDir);
