@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:distributor_flutter_android/core/app_upgrador_core.dart';
 import 'package:distributor_flutter_android/di/static_dependencies.dart';
 import 'package:distributor_flutter_android/services/git_wrapper/git_wrapper_impl.dart';
+import 'package:distributor_flutter_android/services/parsers/pubspec/pubspec_parser.dart';
 import 'package:distributor_flutter_android/services/parsers/stdout/impl/stdout_build_abi_apk_parser.dart';
 import 'package:distributor_flutter_android/services/parsers/stdout/impl/stdout_build_apk_parser.dart';
 import 'package:distributor_flutter_android/services/parsers/stdout/impl/stdout_sdk_version_parser.dart';
@@ -10,6 +12,11 @@ import 'package:distributor_flutter_android/services/sources_code_builder/flutte
 import 'package:distributor_flutter_android/services/sources_code_puller/source_code_puller.dart';
 
 Future<void> main() async {
+  final workingDirSourceCode = _getWorkingDir(
+    localDirForSourceCode,
+    urlSourceCode.split('/').last,
+  );
+
   const stdoutParser = StdoutParserImpl();
   final gitWrapper = GitWrapperImpl(
     stdoutParser: stdoutParser,
@@ -21,24 +28,29 @@ Future<void> main() async {
     gitWrapper: gitWrapper,
   );
 
-  await sourceCodePuller.execute();
-
   final parserSdk = StdoutSdkVersionParser(stdoutParser: stdoutParser);
   final parserBuildUniversal = StdoutBuildApkParser(stdoutParser: stdoutParser);
   final parserBuildAbi = StdoutBuildAbiApkParser(stdoutParser: stdoutParser);
+  final pubSpecParser = PubSpecParser(
+    pathFile: '${workingDirSourceCode}pubspec.yaml',
+  );
 
   final flutterAndroidBuilder = FlutterAndroidBuilderImpl(
-    workingDir:
-        _getWorkingDir(localDirForSourceCode, urlSourceCode.split('/').last),
+    workingDir: workingDirSourceCode,
     parserSdk: parserSdk,
     parserBuildUniversal: parserBuildUniversal,
     parserBuildAbi: parserBuildAbi,
   );
 
-  final sdkInfo = await flutterAndroidBuilder.getSdkInfo();
-  print(sdkInfo);
-  final buildAbiApk = await flutterAndroidBuilder.buildReleaseAbiApk();
-  print(buildAbiApk);
+  final server = await HttpServer.bind('192.168.50.143', port);
+
+  final appUpgradorCore = AppUpgradorCore(
+    server: server,
+    codePuller: sourceCodePuller,
+    flutterAndroidBuilder: flutterAndroidBuilder,
+    pubSpecParser: pubSpecParser,
+    periodCodePulling: Duration(minutes: periodUpdateSourceCodeInMinutes),
+  );
 }
 
 String _getWorkingDir(

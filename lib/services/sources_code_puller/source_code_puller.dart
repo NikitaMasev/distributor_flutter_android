@@ -2,8 +2,9 @@ import 'dart:io';
 
 import 'package:distributor_flutter_android/internal/executable.dart';
 import 'package:distributor_flutter_android/services/git_wrapper/git_wrapper.dart';
+import 'package:distributor_flutter_android/services/sources_code_puller/pull_status.dart';
 
-class SourceCodePuller implements Executable {
+class SourceCodePuller implements Executable<PullStatus> {
   SourceCodePuller({
     required final String localDirForSourceCode,
     required final String urlSourceCode,
@@ -17,20 +18,26 @@ class SourceCodePuller implements Executable {
   final GitWrapper _gitWrapper;
 
   @override
-  Future<bool> execute() async {
-    var result = false;
-
+  Future<PullStatus> execute() async {
     if (Directory(_localDirForSourceCode).existsSync()) {
-      result = await _gitWrapper.fetch(
+      final needUpdate = await _gitWrapper.fetch(
         _localDirForSourceCode,
         _urlSourceCode,
       );
-      if (result) {
-        result = await _gitWrapper.pull(_localDirForSourceCode, _urlSourceCode);
+      if (needUpdate) {
+        final pullSuccess = await _gitWrapper.pull(
+          _localDirForSourceCode,
+          _urlSourceCode,
+        );
+        return pullSuccess ? PullStatus.updated : PullStatus.error;
       }
     } else {
-      result = await _gitWrapper.clone(_localDirForSourceCode, _urlSourceCode);
+      final cloneSuccess = await _gitWrapper.clone(
+        _localDirForSourceCode,
+        _urlSourceCode,
+      );
+      return cloneSuccess ? PullStatus.downloaded : PullStatus.error;
     }
-    return result;
+    return PullStatus.noNeedUpdate;
   }
 }

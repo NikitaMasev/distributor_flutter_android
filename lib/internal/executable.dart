@@ -1,3 +1,3 @@
-abstract interface class Executable {
-  Future<bool> execute();
+abstract interface class Executable<T> {
+  Future<T> execute();
 }

@@ -30,8 +30,14 @@ class FlutterAndroidBuilderImpl implements FlutterAndroidBuilder {
 
     _checkAndThrowException(flutterBuildResult);
 
-    return parserBuildAbi.parseString(
+    final buildAbiApkLocalPath = await parserBuildAbi.parseString(
       flutterBuildResult.stdout.toString().trim(),
+    );
+
+    return BuildAbiApk(
+      pathX86X64: '$workingDir${buildAbiApkLocalPath.pathX86X64}',
+      pathArm64V8a: '$workingDir${buildAbiApkLocalPath.pathArm64V8a}',
+      pathArmV7a: '$workingDir${buildAbiApkLocalPath.pathArmV7a}',
     );
   }
 
@@ -46,8 +52,12 @@ class FlutterAndroidBuilderImpl implements FlutterAndroidBuilder {
 
     _checkAndThrowException(flutterBuildResult);
 
-    return parserBuildUniversal.parseString(
+    final buildUniversalApkLocalPath = await parserBuildUniversal.parseString(
       flutterBuildResult.stdout.toString().trim(),
+    );
+
+    return BuildUniversalApk(
+      path: '$workingDir${buildUniversalApkLocalPath.path}',
     );
   }
 
