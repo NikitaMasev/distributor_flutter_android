@@ -51,6 +51,7 @@ Future<void> main() async {
     pubSpecParser: pubSpecParser,
     periodCodePulling: Duration(minutes: periodUpdateSourceCodeInMinutes),
   );
+  await appUpgradorCore.execute();
 }
 
 String _getWorkingDir(

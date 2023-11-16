@@ -34,12 +34,13 @@ class AppUpgradorCore implements Executable<void> {
   @override
   Future<void> execute() async {
     final pullStatus = await _codePuller.execute();
-
+    print('$runtimeType: Code puller $pullStatus');
     if (pullStatus == PullStatus.error) {
       return;
     }
 
     _buildAbiApk = await _flutterAndroidBuilder.buildReleaseAbiApk();
+    print('$runtimeType: Builded $_buildAbiApk');
     _runTimerPullingCode();
 
     _server.listen((final request) {
