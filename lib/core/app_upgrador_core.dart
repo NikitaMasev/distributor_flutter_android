@@ -44,8 +44,6 @@ class AppUpgradorCore implements Executable<void> {
     _runTimerPullingCode();
 
     _server.listen((final request) {
-      print(request.method);
-      print(request.requestedUri.pathSegments);
       print(request.headers);
 
       switch (request.method) {
@@ -76,6 +74,7 @@ class AppUpgradorCore implements Executable<void> {
 
       if (pullStatus == PullStatus.updated) {
         _buildAbiApk = await _flutterAndroidBuilder.buildReleaseAbiApk();
+        print('$runtimeType: Builded $_buildAbiApk');
       }
     });
   }

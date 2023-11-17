@@ -14,5 +14,5 @@ final branchLocalSrcCode =
 final localDirForSourceCode =
     Platform.environment['LOC_DIR_SRC_CODE'] ?? 'home_monitor';
 final periodUpdateSourceCodeInMinutes = int.parse(
-  Platform.environment['PERIOD_UPDATE_SRC_CODE_MINUTE'] ?? '60',
+  Platform.environment['PERIOD_UPDATE_SRC_CODE_MINUTE'] ?? '5',
 );

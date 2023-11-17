@@ -5,10 +5,18 @@ abstract interface class GitWrapper {
 
   Future<bool> checkout(final String dirGit, final String branch);
 
-  ///return true if need update repo
-  Future<bool> fetch(final String dirRepo, final String urlRepo);
+  Future<bool> fetch(
+    final String dirRepo,
+    final String localBranch,
+    final String remoteBranch,
+  );
 
-  Future<bool> pull(final String dirRepo, final String urlRepo);
+  ///return true if changes exists
+  Future<bool> pull(
+    final String dirRepo,
+    final String localBranch,
+    final String remoteBranch,
+  );
 
   Future<List<String>> lastCommit();
 

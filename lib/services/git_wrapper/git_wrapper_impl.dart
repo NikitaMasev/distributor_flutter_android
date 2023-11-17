@@ -1,31 +1,33 @@
 import 'dart:io';
 
 import 'package:distributor_flutter_android/services/git_wrapper/git_wrapper.dart';
+import 'package:distributor_flutter_android/services/parsers/stdout/impl/stop_phrases.dart';
 import 'package:distributor_flutter_android/services/parsers/stdout_parser/stdout_parser.dart';
-import 'package:git/git.dart' as git_service;
 
 class GitWrapperImpl implements GitWrapper {
   GitWrapperImpl({
     required final StdoutParser stdoutParser,
-    this.logStdout = false,
+    this.logStd = false,
   }) : _stdoutParser = stdoutParser;
 
   final StdoutParser _stdoutParser;
-  final bool logStdout;
+  final bool logStd;
 
-  void _printStdout(final dynamic stdout) {
-    if (logStdout) {
-      print(stdout.toString().trim());
+  void _printStd(final ProcessResult result) {
+    if (logStd) {
+      print('stderr\n ${result.stderr}');
+      print('stdout\n ${result.stdout}');
     }
   }
 
   @override
   Future<bool> checkout(final String dirGit, final String branch) async {
-    final result = await git_service.runGit(
+    final result = await Process.run(
+      'git',
       ['checkout', '-b', branch],
-      processWorkingDir: dirGit,
+      workingDirectory: dirGit,
     );
-    _printStdout(result.stdout);
+    _printStd(result);
     return result.exitCode == 0;
   }
 
@@ -35,22 +37,32 @@ class GitWrapperImpl implements GitWrapper {
     if (!dir.existsSync()) {
       await dir.create(recursive: true);
     }
-    final result = await git_service.runGit(
+    final result = await Process.run(
+      'git',
       ['clone', urlRepo],
-      processWorkingDir: dirSaving,
+      workingDirectory: dirSaving,
+      runInShell: true,
     );
-    _printStdout(result.stdout);
+
+    _printStd(result);
     return result.exitCode == 0;
   }
 
   @override
-  Future<bool> fetch(final String dirRepo, final String urlRepo) async {
-    final result = await git_service.runGit(
-      ['fetch'],
-      processWorkingDir: dirRepo,
+  Future<bool> fetch(
+    final String dirRepo,
+    final String localBranch,
+    final String remoteBranch,
+  ) async {
+    final result = await Process.run(
+      'git',
+      ['fetch', localBranch, remoteBranch],
+      workingDirectory: dirRepo,
+      runInShell: true,
     );
-    _printStdout(result.stdout);
-    return !(await _stdoutParser.emptyOutput(result.stdout.toString()));
+
+    _printStd(result);
+    return result.exitCode == 0;
   }
 
   @override
@@ -72,12 +84,19 @@ class GitWrapperImpl implements GitWrapper {
   }
 
   @override
-  Future<bool> pull(final String dirRepo, final String urlRepo) async {
-    final result = await git_service.runGit(
-      ['pull'],
-      processWorkingDir: dirRepo,
+  Future<bool> pull(
+    final String dirRepo,
+    final String localBranch,
+    final String remoteBranch,
+  ) async {
+    final result = await Process.run(
+      'git',
+      ['pull', localBranch, remoteBranch],
+      workingDirectory: dirRepo,
+      runInShell: true,
     );
-    return result.exitCode == 0;
+    _printStd(result);
+    return !result.stdout.toString().contains(gitAlreadyUpdated);
   }
 
   @override

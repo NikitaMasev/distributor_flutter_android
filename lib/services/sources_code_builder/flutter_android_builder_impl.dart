@@ -8,16 +8,19 @@ import 'package:distributor_flutter_android/services/sources_code_builder/sdk_in
 
 class FlutterAndroidBuilderImpl implements FlutterAndroidBuilder {
   FlutterAndroidBuilderImpl({
-    required this.workingDir,
-    required this.parserSdk,
-    required this.parserBuildUniversal,
-    required this.parserBuildAbi,
-  });
+    required final String workingDir,
+    required final ParcelableString<SdkInfo> parserSdk,
+    required final ParcelableString<BuildUniversalApk> parserBuildUniversal,
+    required final ParcelableString<BuildAbiApk> parserBuildAbi,
+  })  : _parserBuildAbi = parserBuildAbi,
+        _parserBuildUniversal = parserBuildUniversal,
+        _parserSdk = parserSdk,
+        _workingDir = workingDir;
 
-  final String workingDir;
-  final ParcelableString<SdkInfo> parserSdk;
-  final ParcelableString<BuildUniversalApk> parserBuildUniversal;
-  final ParcelableString<BuildAbiApk> parserBuildAbi;
+  final String _workingDir;
+  final ParcelableString<SdkInfo> _parserSdk;
+  final ParcelableString<BuildUniversalApk> _parserBuildUniversal;
+  final ParcelableString<BuildAbiApk> _parserBuildAbi;
 
   @override
   Future<BuildAbiApk> buildReleaseAbiApk() async {
@@ -25,19 +28,19 @@ class FlutterAndroidBuilderImpl implements FlutterAndroidBuilder {
       'flutter',
       ['build', 'apk', '--release', '--split-per-abi'],
       runInShell: true,
-      workingDirectory: workingDir,
+      workingDirectory: _workingDir,
     );
 
     _checkAndThrowException(flutterBuildResult);
 
-    final buildAbiApkLocalPath = await parserBuildAbi.parseString(
+    final buildAbiApkLocalPath = await _parserBuildAbi.parseString(
       flutterBuildResult.stdout.toString().trim(),
     );
 
     return BuildAbiApk(
-      pathX86X64: '$workingDir${buildAbiApkLocalPath.pathX86X64}',
-      pathArm64V8a: '$workingDir${buildAbiApkLocalPath.pathArm64V8a}',
-      pathArmV7a: '$workingDir${buildAbiApkLocalPath.pathArmV7a}',
+      pathX86X64: '$_workingDir${buildAbiApkLocalPath.pathX86X64}',
+      pathArm64V8a: '$_workingDir${buildAbiApkLocalPath.pathArm64V8a}',
+      pathArmV7a: '$_workingDir${buildAbiApkLocalPath.pathArmV7a}',
     );
   }
 
@@ -47,17 +50,17 @@ class FlutterAndroidBuilderImpl implements FlutterAndroidBuilder {
       'flutter',
       ['build', 'apk', '--release'],
       runInShell: true,
-      workingDirectory: workingDir,
+      workingDirectory: _workingDir,
     );
 
     _checkAndThrowException(flutterBuildResult);
 
-    final buildUniversalApkLocalPath = await parserBuildUniversal.parseString(
+    final buildUniversalApkLocalPath = await _parserBuildUniversal.parseString(
       flutterBuildResult.stdout.toString().trim(),
     );
 
     return BuildUniversalApk(
-      path: '$workingDir${buildUniversalApkLocalPath.path}',
+      path: '$_workingDir${buildUniversalApkLocalPath.path}',
     );
   }
 
@@ -67,11 +70,12 @@ class FlutterAndroidBuilderImpl implements FlutterAndroidBuilder {
       'flutter',
       ['--version'],
       runInShell: true,
-      workingDirectory: workingDir,
+      workingDirectory: _workingDir,
     );
 
     _checkAndThrowException(flutterVersionResult);
-    return parserSdk.parseString(flutterVersionResult.stdout.toString().trim());
+    return _parserSdk
+        .parseString(flutterVersionResult.stdout.toString().trim());
   }
 
   void _checkAndThrowException(final ProcessResult result) {

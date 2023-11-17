@@ -6,38 +6,51 @@ import 'package:distributor_flutter_android/services/sources_code_puller/pull_st
 
 class SourceCodePuller implements Executable<PullStatus> {
   SourceCodePuller({
-    required final String localDirForSourceCode,
+    required final String localDirForSaving,
     required final String urlSourceCode,
+    required final String localBranch,
+    required final String remoteBranch,
     required final GitWrapper gitWrapper,
   })  : _gitWrapper = gitWrapper,
         _urlSourceCode = urlSourceCode,
-        _localDirForSourceCode = localDirForSourceCode;
+        _localBranch = localBranch,
+        _remoteBranch = remoteBranch,
+        _localDirForSaving = localDirForSaving;
 
-  final String _localDirForSourceCode;
+  final String _localDirForSaving;
   final String _urlSourceCode;
+  final String _localBranch;
+  final String _remoteBranch;
   final GitWrapper _gitWrapper;
 
   @override
   Future<PullStatus> execute() async {
-    if (Directory(_localDirForSourceCode).existsSync()) {
-      final needUpdate = await _gitWrapper.fetch(
-        _localDirForSourceCode,
-        _urlSourceCode,
+    if (Directory(_localDirForSaving).existsSync()) {
+      final gitProjectDir =
+          '$_localDirForSaving/${_urlSourceCode.split('/').last}';
+
+      final fetchSuccess = await _gitWrapper.fetch(
+        gitProjectDir,
+        _localBranch,
+        _remoteBranch,
       );
-      if (needUpdate) {
-        final pullSuccess = await _gitWrapper.pull(
-          _localDirForSourceCode,
-          _urlSourceCode,
-        );
-        return pullSuccess ? PullStatus.updated : PullStatus.error;
+
+      if (!fetchSuccess) {
+        return PullStatus.error;
       }
+
+      final changesExists = await _gitWrapper.pull(
+        gitProjectDir,
+        _localBranch,
+        _remoteBranch,
+      );
+      return changesExists ? PullStatus.updated : PullStatus.noNeedUpdate;
     } else {
       final cloneSuccess = await _gitWrapper.clone(
-        _localDirForSourceCode,
+        _localDirForSaving,
         _urlSourceCode,
       );
       return cloneSuccess ? PullStatus.downloaded : PullStatus.error;
     }
-    return PullStatus.noNeedUpdate;
   }
 }

@@ -12,7 +12,7 @@ import 'package:distributor_flutter_android/services/sources_code_builder/flutte
 import 'package:distributor_flutter_android/services/sources_code_puller/source_code_puller.dart';
 
 Future<void> main() async {
-  final workingDirSourceCode = _getWorkingDir(
+  final fullPathToSrcCode = _getWorkingDir(
     localDirForSourceCode,
     urlSourceCode.split('/').last,
   );
@@ -20,29 +20,32 @@ Future<void> main() async {
   const stdoutParser = StdoutParserImpl();
   final gitWrapper = GitWrapperImpl(
     stdoutParser: stdoutParser,
+    logStd: true,
   );
 
   final sourceCodePuller = SourceCodePuller(
-    localDirForSourceCode: localDirForSourceCode,
+    localDirForSaving: localDirForSourceCode,
     urlSourceCode: urlSourceCode,
     gitWrapper: gitWrapper,
+    localBranch: branchLocalSrcCode,
+    remoteBranch: branchRemoteSrcCode,
   );
 
   final parserSdk = StdoutSdkVersionParser(stdoutParser: stdoutParser);
   final parserBuildUniversal = StdoutBuildApkParser(stdoutParser: stdoutParser);
   final parserBuildAbi = StdoutBuildAbiApkParser(stdoutParser: stdoutParser);
   final pubSpecParser = PubSpecParser(
-    pathFile: '${workingDirSourceCode}pubspec.yaml',
+    pathFile: '${fullPathToSrcCode}pubspec.yaml',
   );
 
   final flutterAndroidBuilder = FlutterAndroidBuilderImpl(
-    workingDir: workingDirSourceCode,
+    workingDir: fullPathToSrcCode,
     parserSdk: parserSdk,
     parserBuildUniversal: parserBuildUniversal,
     parserBuildAbi: parserBuildAbi,
   );
 
-  final server = await HttpServer.bind('192.168.50.143', port);
+  final server = await HttpServer.bind(InternetAddress.anyIPv4.address, port);
 
   final appUpgradorCore = AppUpgradorCore(
     server: server,
@@ -51,6 +54,7 @@ Future<void> main() async {
     pubSpecParser: pubSpecParser,
     periodCodePulling: Duration(minutes: periodUpdateSourceCodeInMinutes),
   );
+
   await appUpgradorCore.execute();
 }
 
