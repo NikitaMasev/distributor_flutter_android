@@ -5,10 +5,14 @@ publish_to: none
 
 environment:
   sdk: '>=3.1.0 <4.0.0'
-
-# Add regular dependencies here.
 dependencies:
-  # path: ^1.8.0
-
+  dfa_common:
+    git:
+      url: https://github.com/NikitaMasev/dfa_common.git
+      ref: main
+  crypto_wrapper:
+    git:
+      url: https://github.com/NikitaMasev/crypto_wrapper.git
+      ref: main
 dev_dependencies:
   lints: ^2.0.0

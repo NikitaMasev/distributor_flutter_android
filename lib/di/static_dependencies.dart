@@ -1,9 +1,7 @@
 import 'dart:io';
 
-final _keyIot = Platform.environment['KEY_IOT'] ?? '0123456789561011';
-final _ivIot = Platform.environment['IV_IOT'] ?? '0000000000000000';
-final _keyClients = Platform.environment['KEY_CLIENTS'] ?? '0123456789561011';
-final _ivClients = Platform.environment['IV_CLIENTS'] ?? '0123456789561011';
+final key = Platform.environment['KEY'] ?? '0';
+final iv = Platform.environment['IV'] ?? '0';
 final port = int.parse(Platform.environment['PORT'] ?? '4500');
 final urlSourceCode = Platform.environment['URL_SRC_CODE'] ??
     'https://github.com/NikitaMasev/home_monitor_app';
@@ -13,6 +11,8 @@ final branchLocalSrcCode =
     Platform.environment['BRANCH_LOC_SRC_CODE'] ?? 'origin';
 final localDirForSourceCode =
     Platform.environment['LOC_DIR_SRC_CODE'] ?? 'home_monitor';
-final periodUpdateSourceCodeInMinutes = int.parse(
-  Platform.environment['PERIOD_UPDATE_SRC_CODE_MINUTE'] ?? '5',
+final periodCheckRepoSrcCode = int.parse(
+  Platform.environment['PERIOD_CHECK_REPO'] ?? '5',
 );
+final awaitingBeforeBuildSrcCode =
+    int.parse(Platform.environment['AWAITING_BEFORE_BUILD_MINUTE'] ?? '10');

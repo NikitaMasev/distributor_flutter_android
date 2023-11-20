@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:crypto_wrapper/crypto_wrapper.dart';
 import 'package:distributor_flutter_android/core/app_upgrador_core.dart';
 import 'package:distributor_flutter_android/di/static_dependencies.dart';
 import 'package:distributor_flutter_android/services/git_wrapper/git_wrapper_impl.dart';
@@ -46,13 +47,16 @@ Future<void> main() async {
   );
 
   final server = await HttpServer.bind(InternetAddress.anyIPv4.address, port);
+  final crypto = CryptoImpl(key: key, iv: iv);
 
   final appUpgradorCore = AppUpgradorCore(
     server: server,
     codePuller: sourceCodePuller,
     flutterAndroidBuilder: flutterAndroidBuilder,
     pubSpecParser: pubSpecParser,
-    periodCodePulling: Duration(minutes: periodUpdateSourceCodeInMinutes),
+    periodCodePulling: Duration(minutes: periodCheckRepoSrcCode),
+    awaitingBeforeFirstBuild: Duration(minutes: awaitingBeforeBuildSrcCode),
+    crypto: crypto,
   );
 
   await appUpgradorCore.execute();
@@ -61,9 +65,5 @@ Future<void> main() async {
 String _getWorkingDir(
   final String localGitDirName,
   final String projectDirName,
-) {
-  final workingDir =
-      '${Directory.current.path}/$localGitDirName/$projectDirName/';
-  print(workingDir);
-  return workingDir;
-}
+) =>
+    '${Directory.current.path}/$localGitDirName/$projectDirName/';

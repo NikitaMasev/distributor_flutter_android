@@ -26,7 +26,13 @@ class FlutterAndroidBuilderImpl implements FlutterAndroidBuilder {
   Future<BuildAbiApk> buildReleaseAbiApk() async {
     final flutterBuildResult = await Process.run(
       'flutter',
-      ['build', 'apk', '--release', '--split-per-abi'],
+      [
+        'build',
+        'apk',
+        '--release',
+        '--split-per-abi',
+        '--dart-define-from-file=prod_keys.json',
+      ],
       runInShell: true,
       workingDirectory: _workingDir,
     );

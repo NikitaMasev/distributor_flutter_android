@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:crypto_wrapper/crypto_wrapper.dart';
+import 'package:dfa_common/dfa_common.dart';
 import 'package:distributor_flutter_android/internal/executable.dart';
 import 'package:distributor_flutter_android/services/parsers/parcelable.dart';
 import 'package:distributor_flutter_android/services/parsers/pubspec/pubspec_data.dart';
@@ -15,18 +17,24 @@ class AppUpgradorCore implements Executable<void> {
     required final Executable<PullStatus> codePuller,
     required final FlutterAndroidBuilder flutterAndroidBuilder,
     required final Parcelable<PubSpecData> pubSpecParser,
+    required final Crypto crypto,
     required final Duration periodCodePulling,
+    required final Duration awaitingBeforeFirstBuild,
   })  : _periodCodePulling = periodCodePulling,
+        _awaitingBeforeFirstBuild = awaitingBeforeFirstBuild,
         _flutterAndroidBuilder = flutterAndroidBuilder,
         _pubSpecParser = pubSpecParser,
         _codePuller = codePuller,
+        _crypto = crypto,
         _server = server;
 
   final HttpServer _server;
   final Executable<PullStatus> _codePuller;
   final Parcelable<PubSpecData> _pubSpecParser;
   final FlutterAndroidBuilder _flutterAndroidBuilder;
+  final Crypto _crypto;
   final Duration _periodCodePulling;
+  final Duration _awaitingBeforeFirstBuild;
 
   late BuildAbiApk _buildAbiApk;
   Timer? _timerPullingCode;
@@ -39,6 +47,10 @@ class AppUpgradorCore implements Executable<void> {
       return;
     }
 
+    print('$runtimeType: Awaiting build');
+    await Future.delayed(_awaitingBeforeFirstBuild);
+    print('$runtimeType: Start build');
+
     _buildAbiApk = await _flutterAndroidBuilder.buildReleaseAbiApk();
     print('$runtimeType: Builded $_buildAbiApk');
     _runTimerPullingCode();
@@ -50,10 +62,10 @@ class AppUpgradorCore implements Executable<void> {
         case 'GET':
           final paths = request.requestedUri.pathSegments;
           switch (paths.first) {
-            case 'needUpgrade':
+            case RequestUpgradePaths.checkUpgrade:
               _needUpgrade(request);
               break;
-            case 'upgrade':
+            case RequestUpgradePaths.upgrade:
               _upgrade(request);
               break;
           }
@@ -80,15 +92,18 @@ class AppUpgradorCore implements Executable<void> {
   }
 
   Future<void> _upgrade(final HttpRequest request) async {
-    final abiClient = request.headers.value('abi');
+    final abiClient = request.headers.value(RequestUpgradeHeaders.abi);
 
     if (abiClient == null) {
       await _responseNoHeader(request);
       return;
     }
+
+    final decryptedAbi = _crypto.decrypt(abiClient);
+
     late final String pathApkFile;
 
-    switch (abiClient) {
+    switch (decryptedAbi) {
       case arm64V8a:
         pathApkFile = _buildAbiApk.pathArm64V8a;
       case armV7a:
@@ -121,14 +136,17 @@ class AppUpgradorCore implements Executable<void> {
   }
 
   Future<void> _needUpgrade(final HttpRequest request) async {
-    final buildVersionClient = request.headers.value('buildversion');
+    final buildVersionClient = request.headers.value(
+      RequestUpgradeHeaders.buildVersion,
+    );
 
     if (buildVersionClient == null) {
       await _responseNoHeader(request);
       return;
     }
 
-    final buildIntClient = int.tryParse(buildVersionClient);
+    final decryptedBuildVersion = _crypto.decrypt(buildVersionClient);
+    final buildIntClient = int.tryParse(decryptedBuildVersion);
 
     if (buildIntClient == null) {
       await _responseNoHeader(request);
