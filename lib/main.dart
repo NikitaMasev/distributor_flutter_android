@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:crypto_wrapper/crypto_wrapper.dart';
@@ -59,7 +60,10 @@ Future<void> main() async {
     crypto: crypto,
   );
 
-  await appUpgradorCore.execute();
+  await runZonedGuarded(
+    () async => appUpgradorCore.execute(),
+    (final error, final stack) => print('$error\n$stack'),
+  );
 }
 
 String _getWorkingDir(

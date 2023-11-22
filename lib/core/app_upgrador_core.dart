@@ -68,11 +68,12 @@ class AppUpgradorCore implements Executable<void> {
             case RequestUpgradePaths.upgrade:
               _upgrade(request);
               break;
+            default:
+              _responseMethodNotAllowed(request);
           }
           break;
         default:
-          request.response.statusCode = HttpStatus.methodNotAllowed;
-          request.response.close();
+          _responseMethodNotAllowed(request);
       }
     });
   }
@@ -99,7 +100,14 @@ class AppUpgradorCore implements Executable<void> {
       return;
     }
 
-    final decryptedAbi = _crypto.decrypt(abiClient);
+    var decryptedAbi = '';
+
+    try {
+      decryptedAbi = _crypto.decrypt(abiClient);
+    } on Exception {
+      await _invalidDecrypting(request);
+      rethrow;
+    }
 
     late final String pathApkFile;
 
@@ -145,7 +153,15 @@ class AppUpgradorCore implements Executable<void> {
       return;
     }
 
-    final decryptedBuildVersion = _crypto.decrypt(buildVersionClient);
+    var decryptedBuildVersion = '';
+
+    try {
+      decryptedBuildVersion = _crypto.decrypt(buildVersionClient);
+    } on Exception {
+      await _invalidDecrypting(request);
+      rethrow;
+    }
+
     final buildIntClient = int.tryParse(decryptedBuildVersion);
 
     if (buildIntClient == null) {
@@ -164,7 +180,19 @@ class AppUpgradorCore implements Executable<void> {
   Future<void> _responseNoHeader(final HttpRequest request) async {
     request.response
       ..statusCode = HttpStatus.badRequest
-      ..write('Not founded header');
+      ..write('Not founded header.');
+    await request.response.close();
+  }
+
+  Future<void> _responseMethodNotAllowed(final HttpRequest request) async {
+    request.response.statusCode = HttpStatus.methodNotAllowed;
+    await request.response.close();
+  }
+
+  Future<void> _invalidDecrypting(final HttpRequest request) async {
+    request.response
+      ..statusCode = HttpStatus.badRequest
+      ..write('Invalid decrypting headers.');
     await request.response.close();
   }
 }
