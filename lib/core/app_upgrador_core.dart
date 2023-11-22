@@ -3,13 +3,13 @@ import 'dart:io';
 
 import 'package:crypto_wrapper/crypto_wrapper.dart';
 import 'package:dfa_common/dfa_common.dart';
-import 'package:distributor_flutter_android/internal/executable.dart';
 import 'package:distributor_flutter_android/services/parsers/parcelable.dart';
 import 'package:distributor_flutter_android/services/parsers/pubspec/pubspec_data.dart';
 import 'package:distributor_flutter_android/services/parsers/stdout/impl/stop_phrases.dart';
 import 'package:distributor_flutter_android/services/parsers/stdout/models/build_abi_apk.dart';
 import 'package:distributor_flutter_android/services/sources_code_builder/flutter_android_builder.dart';
 import 'package:distributor_flutter_android/services/sources_code_puller/pull_status.dart';
+import 'package:launchable_interfaces/launchable_interfaces.dart';
 
 class AppUpgradorCore implements Executable<void> {
   AppUpgradorCore({

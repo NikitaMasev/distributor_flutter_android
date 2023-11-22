@@ -83,6 +83,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.7"
+  launchable_interfaces:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: main
+      resolved-ref: "5bd7f096023e989adcfda1c1fc3ee9d161546a67"
+      url: "https://github.com/NikitaMasev/launchable_interfaces.git"
+    source: git
+    version: "1.0.0"
   lints:
     dependency: "direct dev"
     description:

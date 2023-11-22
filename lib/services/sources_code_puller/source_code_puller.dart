@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:distributor_flutter_android/internal/executable.dart';
 import 'package:distributor_flutter_android/services/git_wrapper/git_wrapper.dart';
 import 'package:distributor_flutter_android/services/sources_code_puller/pull_status.dart';
+import 'package:launchable_interfaces/launchable_interfaces.dart';
 
 class SourceCodePuller implements Executable<PullStatus> {
   SourceCodePuller({

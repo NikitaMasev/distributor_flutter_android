@@ -9,7 +9,7 @@ final branchRemoteSrcCode =
     Platform.environment['BRANCH_REM_SRC_CODE'] ?? 'main';
 final branchLocalSrcCode =
     Platform.environment['BRANCH_LOC_SRC_CODE'] ?? 'origin';
-final localDirForSourceCode =
+final localDirForSrcCode =
     Platform.environment['LOC_DIR_SRC_CODE'] ?? 'home_monitor';
 final periodCheckRepoSrcCode = int.parse(
   Platform.environment['PERIOD_CHECK_REPO'] ?? '5',

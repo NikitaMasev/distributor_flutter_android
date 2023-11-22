@@ -14,7 +14,7 @@ import 'package:distributor_flutter_android/services/sources_code_puller/source_
 
 Future<void> main() async {
   final fullPathToSrcCode = _getWorkingDir(
-    localDirForSourceCode,
+    localDirForSrcCode,
     urlSourceCode.split('/').last,
   );
 
@@ -25,7 +25,7 @@ Future<void> main() async {
   );
 
   final sourceCodePuller = SourceCodePuller(
-    localDirForSaving: localDirForSourceCode,
+    localDirForSaving: localDirForSrcCode,
     urlSourceCode: urlSourceCode,
     gitWrapper: gitWrapper,
     localBranch: branchLocalSrcCode,

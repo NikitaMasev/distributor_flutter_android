@@ -1,6 +1,6 @@
 name: distributor_flutter_android
 description: A sample command-line application.
-version: 1.0.0
+version: 1.0.1
 publish_to: none
 
 environment:
@@ -13,6 +13,10 @@ dependencies:
   crypto_wrapper:
     git:
       url: https://github.com/NikitaMasev/crypto_wrapper.git
+      ref: main
+  launchable_interfaces:
+    git:
+      url: https://github.com/NikitaMasev/launchable_interfaces.git
       ref: main
 dev_dependencies:
   lints: ^2.0.0
