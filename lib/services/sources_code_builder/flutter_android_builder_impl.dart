@@ -88,7 +88,7 @@ class FlutterAndroidBuilderImpl implements FlutterAndroidBuilder {
   void _checkAndThrowException(final ProcessResult result) {
     if (result.exitCode != 0) {
       if (!result.stderr.toString().contains(note)) {
-        throw Exception('$runtimeType:${result.stdout}');
+        throw Exception('$runtimeType:${result.stdout}\n${result.stderr}');
       }
     }
   }
