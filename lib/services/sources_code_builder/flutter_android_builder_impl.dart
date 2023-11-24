@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:distributor_flutter_android/services/parsers/parcelable_string.dart';
+import 'package:distributor_flutter_android/services/parsers/stdout/impl/stop_phrases.dart';
 import 'package:distributor_flutter_android/services/parsers/stdout/models/build_abi_apk.dart';
 import 'package:distributor_flutter_android/services/parsers/stdout/models/build_universal_apk.dart';
 import 'package:distributor_flutter_android/services/sources_code_builder/flutter_android_builder.dart';
@@ -86,7 +87,9 @@ class FlutterAndroidBuilderImpl implements FlutterAndroidBuilder {
 
   void _checkAndThrowException(final ProcessResult result) {
     if (result.exitCode != 0) {
-      throw Exception('$runtimeType:${result.stdout}');
+      if (!result.stderr.toString().contains(note)) {
+        throw Exception('$runtimeType:${result.stdout}');
+      }
     }
   }
 }

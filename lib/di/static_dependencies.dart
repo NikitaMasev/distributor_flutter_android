@@ -15,4 +15,4 @@ final periodCheckRepoSrcCode = int.parse(
   Platform.environment['PERIOD_CHECK_REPO'] ?? '5',
 );
 final awaitingBeforeBuildSrcCode =
-    int.parse(Platform.environment['AWAITING_BEFORE_BUILD_MINUTE'] ?? '10');
+    int.parse(Platform.environment['AWAITING_BEFORE_BUILD_MINUTE'] ?? '1');

@@ -7,4 +7,5 @@ const flutter = 'Flutter';
 const dart = 'Dart';
 const remote = 'remote:';
 const gitAlreadyUpdated = 'Already up to date.';
+const note = 'Note:';
 

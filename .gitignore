@@ -41,5 +41,5 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 dev_keys.json
-prod_keys.json
+home_monitor/home_monitor_app/prod_keys.json
 
