@@ -25,6 +25,38 @@ class FlutterAndroidBuilderImpl implements FlutterAndroidBuilder {
 
   @override
   Future<BuildAbiApk> buildReleaseAbiApk() async {
+    final cleanRes = await Process.run(
+      'flutter',
+      ['clean'],
+      workingDirectory: _workingDir,
+    );
+
+    _checkAndThrowException(cleanRes);
+
+    final upgradeRes = await Process.run(
+      'flutter',
+      ['pub', 'upgrade'],
+      workingDirectory: _workingDir,
+    );
+
+    _checkAndThrowException(upgradeRes);
+
+   final getRes =  await Process.run(
+      'flutter',
+      ['pub', 'get'],
+      workingDirectory: _workingDir,
+    );
+
+    _checkAndThrowException(getRes);
+
+   final genRes =  await Process.run(
+      'flutter',
+      ['pub', 'run', 'build_runner','build', '--delete-conflicting-outputs'],
+      workingDirectory: _workingDir,
+    );
+
+    _checkAndThrowException(genRes);
+
     final flutterBuildResult = await Process.run(
       'flutter',
       [

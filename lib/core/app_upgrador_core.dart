@@ -108,7 +108,7 @@ class AppUpgradorCore implements Executable<void> {
       await _invalidDecrypting(request);
       rethrow;
     }
-
+    print('decryptedAbi $decryptedAbi');
     late final String pathApkFile;
 
     switch (decryptedAbi) {
@@ -161,7 +161,7 @@ class AppUpgradorCore implements Executable<void> {
       await _invalidDecrypting(request);
       rethrow;
     }
-
+    print('decryptedBuildVersion $decryptedBuildVersion');
     final buildIntClient = int.tryParse(decryptedBuildVersion);
 
     if (buildIntClient == null) {
